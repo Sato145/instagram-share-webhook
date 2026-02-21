@@ -335,9 +335,14 @@ def webhook():
         # URLを取得（複数のパターンに対応）
         instagram_url = data.get('url', '')
         
+        # ユーザー名を取得（ショートカットから送信された場合）
+        provided_username = data.get('username', '').strip()
+        
         # パターン1: 二重ネストの辞書
         if isinstance(instagram_url, dict):
             instagram_url = instagram_url.get('url', '')
+            if not provided_username and 'username' in instagram_url:
+                provided_username = instagram_url.get('username', '').strip()
         
         # パターン2: 文字列化された辞書
         if isinstance(instagram_url, str) and instagram_url.startswith('{'):
@@ -379,9 +384,15 @@ def webhook():
             return jsonify({'error': 'Invalid Instagram URL'}), 400
         
         print(f"Processing Instagram URL: {instagram_url}")
+        print(f"Provided username: {provided_username if provided_username else 'None'}")
         
         # Instagram情報取得
         instagram_info = extract_instagram_info(instagram_url)
+        
+        # ショートカットから提供されたユーザー名を優先
+        if provided_username:
+            instagram_info['username'] = provided_username
+            print(f"Using provided username: {provided_username}")
         
         # X投稿文生成
         tweet_text = create_tweet_text(instagram_info)
