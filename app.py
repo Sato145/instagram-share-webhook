@@ -19,13 +19,29 @@ PUSHOVER_TOKEN = os.environ.get('PUSHOVER_TOKEN', '')
 PUSHOVER_USER = os.environ.get('PUSHOVER_USER', '')
 
 def extract_instagram_info(url):
-    """Instagram URLから投稿情報を取得"""
+    """Instagram URLから投稿情報を取得（改善版）"""
     try:
+        # 投稿タイプ判定
+        is_reel = '/reel/' in url
+        is_story = '/stories/' in url
+        
+        # ユーザー名抽出（URLから）
+        username_match = re.search(r'instagram\.com/([^/]+)/', url)
+        username = username_match.group(1) if username_match else 'unknown'
+        
+        # 投稿コード抽出
+        code_match = re.search(r'/(p|reel)/([^/]+)/', url)
+        post_code = code_match.group(2) if code_match else ''
+        
         headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
         }
         
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
         soup = BeautifulSoup(response.text, 'html.parser')
         
         # OGタグから情報取得
@@ -33,19 +49,35 @@ def extract_instagram_info(url):
         og_description = soup.find('meta', property='og:description')
         og_image = soup.find('meta', property='og:image')
         
-        # 投稿タイプ判定
-        is_reel = '/reel/' in url
-        is_story = '/stories/' in url
+        # タイトルからユーザー名を抽出（OGタグから）
+        title_text = og_title['content'] if og_title else ''
+        if title_text and ' on Instagram:' in title_text:
+            username_from_title = title_text.split(' on Instagram:')[0].strip()
+            if username_from_title:
+                username = username_from_title
         
-        # ユーザー名抽出
-        username_match = re.search(r'instagram\.com/([^/]+)/', url)
-        username = username_match.group(1) if username_match else 'unknown'
+        # 説明文を取得
+        description = ''
+        if og_description:
+            desc_text = og_description['content']
+            # "X Likes, Y Comments - ..." の形式から本文を抽出
+            if ' - ' in desc_text:
+                description = desc_text.split(' - ', 1)[1].strip()
+            else:
+                description = desc_text
+        
+        # 説明文が空の場合、タイトルから抽出を試みる
+        if not description and title_text and ':' in title_text:
+            parts = title_text.split(':', 1)
+            if len(parts) > 1:
+                description = parts[1].strip().strip('"')
         
         info = {
             'url': url,
             'username': username,
-            'title': og_title['content'] if og_title else '',
-            'description': og_description['content'] if og_description else '',
+            'post_code': post_code,
+            'title': title_text,
+            'description': description if description else 'Instagram投稿',
             'image_url': og_image['content'] if og_image else '',
             'is_reel': is_reel,
             'is_story': is_story,
@@ -56,11 +88,19 @@ def extract_instagram_info(url):
         
     except Exception as e:
         print(f"Error extracting Instagram info: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # フォールバック: URLから最小限の情報を抽出
+        username_match = re.search(r'instagram\.com/([^/]+)/', url)
+        username = username_match.group(1) if username_match else 'Instagram'
+        
         return {
             'url': url,
-            'username': 'unknown',
+            'username': username,
+            'post_code': '',
             'title': '',
-            'description': 'Instagram投稿',
+            'description': f'{username}さんのInstagram投稿',
             'image_url': '',
             'is_reel': '/reel/' in url,
             'is_story': '/stories/' in url,
