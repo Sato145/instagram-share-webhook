@@ -374,11 +374,16 @@ def webhook():
         # ユーザー名を取得（ショートカットから送信された場合）
         provided_username = data.get('username', '').strip()
         
+        # 投稿本文を取得（ショートカットから送信された場合）
+        provided_caption = data.get('caption', '').strip()
+        
         # パターン1: 二重ネストの辞書
         if isinstance(instagram_url, dict):
             instagram_url = instagram_url.get('url', '')
             if not provided_username and 'username' in instagram_url:
                 provided_username = instagram_url.get('username', '').strip()
+            if not provided_caption and 'caption' in instagram_url:
+                provided_caption = instagram_url.get('caption', '').strip()
         
         # パターン2: 文字列化された辞書
         if isinstance(instagram_url, str) and instagram_url.startswith('{'):
@@ -421,6 +426,7 @@ def webhook():
         
         print(f"Processing Instagram URL: {instagram_url}")
         print(f"Provided username: {provided_username if provided_username else 'None'}")
+        print(f"Provided caption: {provided_caption if provided_caption else 'None'}")
         
         # Instagram情報取得
         instagram_info = extract_instagram_info(instagram_url)
@@ -429,6 +435,11 @@ def webhook():
         if provided_username:
             instagram_info['username'] = provided_username
             print(f"Using provided username: {provided_username}")
+        
+        # ショートカットから提供された投稿本文を優先
+        if provided_caption:
+            instagram_info['description'] = provided_caption
+            print(f"Using provided caption: {provided_caption[:100]}")
         
         # X投稿文生成
         tweet_text = create_tweet_text(instagram_info)
