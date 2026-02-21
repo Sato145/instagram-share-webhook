@@ -183,10 +183,18 @@ def webhook():
         # リクエストデータ取得
         data = request.get_json()
         
+        # デバッグ用ログ
+        print(f"Received data type: {type(data)}")
+        print(f"Received data: {data}")
+        
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
         instagram_url = data.get('url', '')
+        
+        # デバッグ用ログ
+        print(f"Extracted URL type: {type(instagram_url)}")
+        print(f"Extracted URL: {instagram_url}")
         
         if not instagram_url:
             return jsonify({'error': 'No URL provided'}), 400
@@ -228,6 +236,8 @@ def webhook():
         
     except Exception as e:
         print(f"Error processing webhook: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'error': str(e),
             'status': 'error'
