@@ -289,8 +289,35 @@ def send_pushover_notification(tweet_text, twitter_url, instagram_info):
         print("Pushover credentials not configured")
         return False
     
-    # 通知メッセージ
-    message = f"📱 Instagram投稿を共有しました\n\n{tweet_text}\n\n👇 タップしてXに投稿"
+    # 投稿タイプに応じた絵文字
+    emoji = '🎬' if instagram_info['is_reel'] else '📷'
+    
+    # 通知メッセージを構築
+    message_parts = [
+        f"{emoji} {instagram_info['username']}さんの{instagram_info['type']}"
+    ]
+    
+    # 本文がある場合は追加（最大200文字）
+    if instagram_info['description']:
+        desc = instagram_info['description']
+        if len(desc) > 200:
+            desc = desc[:200] + '...'
+        message_parts.append(f"\n📝 {desc}")
+    
+    # URLを追加
+    message_parts.append(f"\n\n🔗 {instagram_info['url']}")
+    
+    # ハッシュタグを追加
+    if instagram_info['username'] == 'Instagram':
+        hashtag = '#Instagram'
+    else:
+        clean_username = instagram_info['username'].replace(' ', '').replace('@', '')
+        hashtag = f"#{clean_username}"
+    message_parts.append(f"\n\n{hashtag}")
+    
+    message_parts.append("\n\n👇 タップしてXに投稿")
+    
+    message = ''.join(message_parts)
     
     try:
         response = requests.post(
@@ -299,7 +326,7 @@ def send_pushover_notification(tweet_text, twitter_url, instagram_info):
                 'token': PUSHOVER_TOKEN,
                 'user': PUSHOVER_USER,
                 'message': message,
-                'title': f'Instagram {instagram_info["type"]}を共有',
+                'title': f'{emoji} Instagram {instagram_info["type"]}を共有',
                 'url': twitter_url,
                 'url_title': 'Xに投稿する',
                 'priority': 0
