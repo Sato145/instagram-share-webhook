@@ -22,7 +22,9 @@ def extract_instagram_info(url):
     """Instagram URLから投稿情報を取得（改善版）"""
     try:
         # URLを正規化（クエリパラメータを削除）
-        clean_url = url.split('?')[0]
+        clean_url = url.split('?')[0].rstrip('/')
+        
+        print(f"Processing URL: {clean_url}")
         
         # 投稿タイプ判定
         is_reel = '/reel/' in clean_url
@@ -32,103 +34,156 @@ def extract_instagram_info(url):
         code_match = re.search(r'/(p|reel)/([A-Za-z0-9_-]+)', clean_url)
         post_code = code_match.group(2) if code_match else ''
         
-        print(f"Fetching Instagram info for: {clean_url}")
+        # URLからユーザー名を抽出（複数パターン対応）
+        username = None
+        
+        # パターン1: https://www.instagram.com/username/p/CODE/ または /reel/CODE/
+        url_match = re.search(r'instagram\.com/([^/]+)/(p|reel)/', clean_url)
+        if url_match:
+            potential_username = url_match.group(1)
+            # 'www', 'p', 'reel', 'stories' などは除外
+            if potential_username not in ['www', 'p', 'reel', 'stories', 'tv']:
+                username = potential_username
+                print(f"✓ Extracted username from URL pattern 1: {username}")
+        
+        # パターン2: https://www.instagram.com/reel/CODE/ (ユーザー名なし、OGタグから取得必要)
+        if not username:
+            print(f"⚠ Could not extract username from URL, will try OG tags")
+        
         print(f"Post code: {post_code}")
+        print(f"Is reel: {is_reel}")
         
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-        }
-        
-        response = requests.get(clean_url, headers=headers, timeout=15, allow_redirects=True)
-        print(f"Response status: {response.status_code}")
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # OGタグから情報取得
-        og_title = soup.find('meta', property='og:title')
-        og_description = soup.find('meta', property='og:description')
-        og_image = soup.find('meta', property='og:image')
-        
-        print(f"OG Title: {og_title['content'] if og_title else 'None'}")
-        print(f"OG Description: {og_description['content'][:100] if og_description else 'None'}")
-        
-        # ユーザー名を抽出（複数の方法を試す）
-        username = 'Instagram'
-        
-        # 方法1: OGタイトルから抽出
-        if og_title:
-            title_text = og_title['content']
-            # パターン: "Username on Instagram: ..."
-            if ' on Instagram' in title_text:
-                username = title_text.split(' on Instagram')[0].strip()
-                # "@" を削除
-                username = username.lstrip('@')
-            # パターン: "Username (@username) • Instagram photos and videos"
-            elif '(@' in title_text:
-                match = re.search(r'\(@([^)]+)\)', title_text)
-                if match:
-                    username = match.group(1)
-            # パターン: "Username • Instagram photos and videos"
-            elif ' • Instagram' in title_text:
-                username = title_text.split(' • Instagram')[0].strip()
-        
-        # 方法2: URLから抽出（フォールバック）
-        if username == 'Instagram':
-            # /p/CODE/ の前のユーザー名を探す
-            # 通常のURL: https://www.instagram.com/username/p/CODE/
-            # リールURL: https://www.instagram.com/username/reel/CODE/
-            url_match = re.search(r'instagram\.com/([^/]+)/(p|reel)/', clean_url)
-            if url_match:
-                username = url_match.group(1)
-        
-        print(f"Extracted username: {username}")
-        
-        # 説明文を取得
+        # OGタグから情報を取得
         description = ''
-        if og_description:
-            desc_text = og_description['content']
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Cache-Control': 'max-age=0'
+            }
             
-            # パターン1: "X Likes, Y Comments - Description"
-            if ' - ' in desc_text:
-                parts = desc_text.split(' - ', 1)
-                if len(parts) > 1:
-                    description = parts[1].strip()
-            # パターン2: "X Followers, Y Following, Z Posts - Description"
-            elif 'Followers' in desc_text and ' - ' in desc_text:
-                parts = desc_text.split(' - ', 1)
-                if len(parts) > 1:
-                    description = parts[1].strip()
-            # パターン3: そのまま使用
+            response = requests.get(clean_url, headers=headers, timeout=15, allow_redirects=True)
+            print(f"Response status: {response.status_code}")
+            print(f"Response URL: {response.url}")
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                
+                # すべてのmetaタグをログ出力（デバッグ用）
+                all_metas = soup.find_all('meta')
+                print(f"Found {len(all_metas)} meta tags")
+                
+                # OGタグから情報取得
+                og_title = soup.find('meta', property='og:title')
+                og_description = soup.find('meta', property='og:description')
+                
+                # Twitterカードも試す
+                twitter_title = soup.find('meta', attrs={'name': 'twitter:title'})
+                twitter_description = soup.find('meta', attrs={'name': 'twitter:description'})
+                
+                # タイトルからユーザー名を抽出
+                title_tag = og_title or twitter_title
+                if title_tag and 'content' in title_tag.attrs:
+                    title_text = title_tag['content']
+                    print(f"OG/Twitter Title: {title_text}")
+                    
+                    # ユーザー名抽出パターン
+                    # "Username on Instagram: "投稿内容""
+                    # "Username (@username) • Instagram photos and videos"
+                    # "@username on Instagram: "投稿内容""
+                    
+                    if not username:  # URLから取得できなかった場合のみ
+                        # パターン1: "Username on Instagram"
+                        if ' on Instagram' in title_text:
+                            username_from_title = title_text.split(' on Instagram')[0].strip()
+                            if username_from_title and username_from_title not in ['Instagram', '']:
+                                username = username_from_title.lstrip('@')
+                                print(f"✓ Extracted username from OG title (pattern 1): {username}")
+                        
+                        # パターン2: "Username (@username)"
+                        elif '(@' in title_text:
+                            match = re.search(r'\(@([^)]+)\)', title_text)
+                            if match:
+                                username = match.group(1)
+                                print(f"✓ Extracted username from OG title (pattern 2): {username}")
+                        
+                        # パターン3: "@username" で始まる
+                        elif title_text.startswith('@'):
+                            username_from_title = title_text.split()[0].lstrip('@')
+                            if username_from_title:
+                                username = username_from_title
+                                print(f"✓ Extracted username from OG title (pattern 3): {username}")
+                
+                # 説明文を抽出
+                desc_tag = og_description or twitter_description
+                if desc_tag and 'content' in desc_tag.attrs:
+                    desc_text = desc_tag['content']
+                    print(f"OG/Twitter Description: {desc_text[:150]}")
+                    
+                    # 説明文のクリーニング
+                    # "123 likes, 45 comments - username on Instagram: "投稿内容""
+                    if ' - ' in desc_text and ' on Instagram:' in desc_text:
+                        # "username on Instagram: "投稿内容"" の部分を抽出
+                        parts = desc_text.split(' on Instagram:', 1)
+                        if len(parts) == 2:
+                            # ユーザー名も抽出（まだ取得できていない場合）
+                            if not username:
+                                username_part = parts[0].split(' - ')[-1].strip()
+                                if username_part and username_part not in ['Instagram', '']:
+                                    username = username_part.lstrip('@')
+                                    print(f"✓ Extracted username from description: {username}")
+                            
+                            # 投稿内容を抽出
+                            description = parts[1].strip().strip('"').strip('"')
+                    elif desc_text and not desc_text.startswith('See Instagram'):
+                        description = desc_text.strip()
+                    
+                    # 不要な文字列を削除
+                    unwanted_phrases = [
+                        'See Instagram photos and videos',
+                        'See photos, videos and more on Instagram',
+                        'View this post on Instagram'
+                    ]
+                    for phrase in unwanted_phrases:
+                        if phrase in description:
+                            description = description.split(phrase)[0].strip()
+                
+                print(f"Extracted description: {description[:100] if description else 'None'}")
+        
+        except Exception as e:
+            print(f"Error fetching OG tags: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # ユーザー名が取得できなかった場合のフォールバック
+        if not username:
+            username = 'Instagram'
+            print(f"⚠ Using fallback username: {username}")
+        
+        # 説明文が取得できなかった場合のデフォルト
+        if not description:
+            if username != 'Instagram':
+                description = f'{username}さんの{"リール" if is_reel else "投稿"}をチェック！'
             else:
-                description = desc_text.strip()
-            
-            # 末尾の "See Instagram photos and videos..." を削除
-            if 'See Instagram photos and videos' in description:
-                description = description.split('See Instagram photos and videos')[0].strip()
+                description = 'Instagram投稿をチェック！'
         
-        # 説明文が空の場合、タイトルから抽出を試みる
-        if not description and og_title:
-            title_text = og_title['content']
-            if ':' in title_text and ' on Instagram' in title_text:
-                # "Username on Instagram: Description"
-                parts = title_text.split(':', 1)
-                if len(parts) > 1:
-                    description = parts[1].split(' on Instagram')[0].strip().strip('"')
-        
-        print(f"Extracted description: {description[:100] if description else 'None'}")
+        print(f"✓ Final username: {username}")
+        print(f"✓ Final description: {description[:100]}")
         
         info = {
             'url': clean_url,
             'username': username,
             'post_code': post_code,
-            'title': og_title['content'] if og_title else '',
-            'description': description if description else f'{username}さんのInstagram投稿',
-            'image_url': og_image['content'] if og_image else '',
+            'title': '',
+            'description': description,
+            'image_url': '',
             'is_reel': is_reel,
             'is_story': is_story,
             'type': 'リール' if is_reel else 'ストーリー' if is_story else '投稿'
@@ -142,24 +197,28 @@ def extract_instagram_info(url):
         traceback.print_exc()
         
         # フォールバック: URLから最小限の情報を抽出
-        clean_url = url.split('?')[0]
+        clean_url = url.split('?')[0].rstrip('/')
         
         # URLからユーザー名を抽出
         username = 'Instagram'
         url_match = re.search(r'instagram\.com/([^/]+)/(p|reel)/', clean_url)
         if url_match:
-            username = url_match.group(1)
+            potential_username = url_match.group(1)
+            if potential_username not in ['www', 'p', 'reel', 'stories', 'tv']:
+                username = potential_username
+        
+        is_reel = '/reel/' in clean_url
         
         return {
             'url': clean_url,
             'username': username,
             'post_code': '',
             'title': '',
-            'description': f'{username}さんのInstagram投稿',
+            'description': f'{username}さんの{"リール" if is_reel else "投稿"}をチェック！',
             'image_url': '',
-            'is_reel': '/reel/' in clean_url,
+            'is_reel': is_reel,
             'is_story': '/stories/' in clean_url,
-            'type': 'リール' if '/reel/' in clean_url else 'ストーリー' if '/stories/' in clean_url else '投稿'
+            'type': 'リール' if is_reel else 'ストーリー' if '/stories/' in clean_url else '投稿'
         }
 
 def create_tweet_text(info):
