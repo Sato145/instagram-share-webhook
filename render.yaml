@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: instagram-share-webhook
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PUSHOVER_TOKEN
+        sync: false
+      - key: PUSHOVER_USER
+        sync: false

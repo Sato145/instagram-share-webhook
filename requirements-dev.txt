@@ -1,0 +1,5 @@
+# 開発環境用の追加パッケージ
+-r requirements.txt
+
+python-dotenv==1.0.0
+pytest==7.4.3
