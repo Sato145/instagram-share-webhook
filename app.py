@@ -190,12 +190,36 @@ def webhook():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        # URLを取得（二重ネストに対応）
+        # URLを取得（複数のパターンに対応）
         instagram_url = data.get('url', '')
         
-        # もし辞書が返ってきた場合、さらに'url'キーを取得
+        # パターン1: 二重ネストの辞書
         if isinstance(instagram_url, dict):
             instagram_url = instagram_url.get('url', '')
+        
+        # パターン2: 文字列化された辞書
+        if isinstance(instagram_url, str) and instagram_url.startswith('{'):
+            try:
+                import json
+                parsed = json.loads(instagram_url)
+                if isinstance(parsed, dict):
+                    instagram_url = parsed.get('url', '')
+            except:
+                pass
+        
+        # パターン3: エスケープされたJSON文字列
+        if isinstance(instagram_url, str) and '\\/' in instagram_url:
+            # バックスラッシュをアンエスケープ
+            instagram_url = instagram_url.replace('\\/', '/')
+            # もう一度JSONパースを試みる
+            if instagram_url.startswith('{'):
+                try:
+                    import json
+                    parsed = json.loads(instagram_url)
+                    if isinstance(parsed, dict):
+                        instagram_url = parsed.get('url', '')
+                except:
+                    pass
         
         # デバッグ用ログ
         print(f"Extracted URL type: {type(instagram_url)}")
@@ -203,6 +227,10 @@ def webhook():
         
         if not instagram_url:
             return jsonify({'error': 'No URL provided'}), 400
+        
+        # 最終的にまだ辞書形式の文字列が残っている場合
+        if isinstance(instagram_url, str) and instagram_url.startswith('{'):
+            return jsonify({'error': f'Invalid URL format: {instagram_url}'}), 400
         
         # Instagram URLの検証
         if 'instagram.com' not in instagram_url:
