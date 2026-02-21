@@ -184,11 +184,11 @@ def extract_instagram_info(url):
                                     description = description.split(phrase)[0].strip()
                     
                     print(f"Extracted description: {description[:100] if description else 'None'}")
-        
-        except Exception as e:
-            print(f"Error fetching OG tags: {e}")
-            import traceback
-            traceback.print_exc()
+            
+            except Exception as e:
+                print(f"Error fetching OG tags: {e}")
+                import traceback
+                traceback.print_exc()
         
         # ユーザー名が取得できなかった場合のフォールバック
         if not username:
