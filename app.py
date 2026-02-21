@@ -53,109 +53,137 @@ def extract_instagram_info(url):
         print(f"Post code: {post_code}")
         print(f"Is reel: {is_reel}")
         
-        # OGタグから情報を取得
+        # Instagram情報を取得（複数の方法を試行）
         description = ''
+        
+        # 方法1: oEmbed API（公式の埋め込み用API）
         try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Cache-Control': 'max-age=0'
-            }
+            oembed_url = f"https://graph.facebook.com/v12.0/instagram_oembed?url={clean_url}&access_token=&omitscript=true"
+            oembed_response = requests.get(oembed_url, timeout=10)
             
-            response = requests.get(clean_url, headers=headers, timeout=15, allow_redirects=True)
-            print(f"Response status: {response.status_code}")
-            print(f"Response URL: {response.url}")
-            
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
+            if oembed_response.status_code == 200:
+                oembed_data = oembed_response.json()
+                print(f"oEmbed data: {oembed_data}")
                 
-                # すべてのmetaタグをログ出力（デバッグ用）
-                all_metas = soup.find_all('meta')
-                print(f"Found {len(all_metas)} meta tags")
+                # ユーザー名を抽出
+                if 'author_name' in oembed_data and not username:
+                    username = oembed_data['author_name'].lstrip('@')
+                    print(f"✓ Extracted username from oEmbed: {username}")
                 
-                # OGタグから情報取得
-                og_title = soup.find('meta', property='og:title')
-                og_description = soup.find('meta', property='og:description')
-                
-                # Twitterカードも試す
-                twitter_title = soup.find('meta', attrs={'name': 'twitter:title'})
-                twitter_description = soup.find('meta', attrs={'name': 'twitter:description'})
-                
-                # タイトルからユーザー名を抽出
-                title_tag = og_title or twitter_title
-                if title_tag and 'content' in title_tag.attrs:
-                    title_text = title_tag['content']
-                    print(f"OG/Twitter Title: {title_text}")
-                    
-                    # ユーザー名抽出パターン
+                # タイトルから説明文を抽出
+                if 'title' in oembed_data:
+                    title = oembed_data['title']
                     # "Username on Instagram: "投稿内容""
-                    # "Username (@username) • Instagram photos and videos"
-                    # "@username on Instagram: "投稿内容""
-                    
-                    if not username:  # URLから取得できなかった場合のみ
-                        # パターン1: "Username on Instagram"
-                        if ' on Instagram' in title_text:
-                            username_from_title = title_text.split(' on Instagram')[0].strip()
-                            if username_from_title and username_from_title not in ['Instagram', '']:
-                                username = username_from_title.lstrip('@')
-                                print(f"✓ Extracted username from OG title (pattern 1): {username}")
-                        
-                        # パターン2: "Username (@username)"
-                        elif '(@' in title_text:
-                            match = re.search(r'\(@([^)]+)\)', title_text)
-                            if match:
-                                username = match.group(1)
-                                print(f"✓ Extracted username from OG title (pattern 2): {username}")
-                        
-                        # パターン3: "@username" で始まる
-                        elif title_text.startswith('@'):
-                            username_from_title = title_text.split()[0].lstrip('@')
-                            if username_from_title:
-                                username = username_from_title
-                                print(f"✓ Extracted username from OG title (pattern 3): {username}")
+                    if ' on Instagram:' in title:
+                        description = title.split(' on Instagram:', 1)[1].strip().strip('"').strip('"')
+                        print(f"✓ Extracted description from oEmbed: {description[:100]}")
+        except Exception as e:
+            print(f"oEmbed API failed: {e}")
+        
+        # 方法2: HTMLページから取得（フォールバック）
+        if not username or not description:
+            try:
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Cache-Control': 'max-age=0'
+                }
                 
-                # 説明文を抽出
-                desc_tag = og_description or twitter_description
-                if desc_tag and 'content' in desc_tag.attrs:
-                    desc_text = desc_tag['content']
-                    print(f"OG/Twitter Description: {desc_text[:150]}")
+                response = requests.get(clean_url, headers=headers, timeout=15, allow_redirects=True)
+                print(f"Response status: {response.status_code}")
+                print(f"Response URL: {response.url}")
+                
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'html.parser')
                     
-                    # 説明文のクリーニング
-                    # "123 likes, 45 comments - username on Instagram: "投稿内容""
-                    if ' - ' in desc_text and ' on Instagram:' in desc_text:
-                        # "username on Instagram: "投稿内容"" の部分を抽出
-                        parts = desc_text.split(' on Instagram:', 1)
-                        if len(parts) == 2:
-                            # ユーザー名も抽出（まだ取得できていない場合）
-                            if not username:
-                                username_part = parts[0].split(' - ')[-1].strip()
-                                if username_part and username_part not in ['Instagram', '']:
-                                    username = username_part.lstrip('@')
-                                    print(f"✓ Extracted username from description: {username}")
+                    # すべてのmetaタグをログ出力（デバッグ用）
+                    all_metas = soup.find_all('meta')
+                    print(f"Found {len(all_metas)} meta tags")
+                    
+                    # OGタグから情報取得
+                    og_title = soup.find('meta', property='og:title')
+                    og_description = soup.find('meta', property='og:description')
+                    
+                    # Twitterカードも試す
+                    twitter_title = soup.find('meta', attrs={'name': 'twitter:title'})
+                    twitter_description = soup.find('meta', attrs={'name': 'twitter:description'})
+                    
+                    # タイトルからユーザー名を抽出
+                    title_tag = og_title or twitter_title
+                    if title_tag and 'content' in title_tag.attrs:
+                        title_text = title_tag['content']
+                        print(f"OG/Twitter Title: {title_text}")
+                        
+                        # ユーザー名抽出パターン
+                        # "Username on Instagram: "投稿内容""
+                        # "Username (@username) • Instagram photos and videos"
+                        # "@username on Instagram: "投稿内容""
+                        
+                        if not username:  # URLから取得できなかった場合のみ
+                            # パターン1: "Username on Instagram"
+                            if ' on Instagram' in title_text:
+                                username_from_title = title_text.split(' on Instagram')[0].strip()
+                                if username_from_title and username_from_title not in ['Instagram', '']:
+                                    username = username_from_title.lstrip('@')
+                                    print(f"✓ Extracted username from OG title (pattern 1): {username}")
                             
-                            # 投稿内容を抽出
-                            description = parts[1].strip().strip('"').strip('"')
-                    elif desc_text and not desc_text.startswith('See Instagram'):
-                        description = desc_text.strip()
+                            # パターン2: "Username (@username)"
+                            elif '(@' in title_text:
+                                match = re.search(r'\(@([^)]+)\)', title_text)
+                                if match:
+                                    username = match.group(1)
+                                    print(f"✓ Extracted username from OG title (pattern 2): {username}")
+                            
+                            # パターン3: "@username" で始まる
+                            elif title_text.startswith('@'):
+                                username_from_title = title_text.split()[0].lstrip('@')
+                                if username_from_title:
+                                    username = username_from_title
+                                    print(f"✓ Extracted username from OG title (pattern 3): {username}")
                     
-                    # 不要な文字列を削除
-                    unwanted_phrases = [
-                        'See Instagram photos and videos',
-                        'See photos, videos and more on Instagram',
-                        'View this post on Instagram'
-                    ]
-                    for phrase in unwanted_phrases:
-                        if phrase in description:
-                            description = description.split(phrase)[0].strip()
-                
-                print(f"Extracted description: {description[:100] if description else 'None'}")
+                    # 説明文を抽出
+                    if not description:  # oEmbedで取得できなかった場合のみ
+                        desc_tag = og_description or twitter_description
+                        if desc_tag and 'content' in desc_tag.attrs:
+                            desc_text = desc_tag['content']
+                            print(f"OG/Twitter Description: {desc_text[:150]}")
+                            
+                            # 説明文のクリーニング
+                            # "123 likes, 45 comments - username on Instagram: "投稿内容""
+                            if ' - ' in desc_text and ' on Instagram:' in desc_text:
+                                # "username on Instagram: "投稿内容"" の部分を抽出
+                                parts = desc_text.split(' on Instagram:', 1)
+                                if len(parts) == 2:
+                                    # ユーザー名も抽出（まだ取得できていない場合）
+                                    if not username:
+                                        username_part = parts[0].split(' - ')[-1].strip()
+                                        if username_part and username_part not in ['Instagram', '']:
+                                            username = username_part.lstrip('@')
+                                            print(f"✓ Extracted username from description: {username}")
+                                    
+                                    # 投稿内容を抽出
+                                    description = parts[1].strip().strip('"').strip('"')
+                            elif desc_text and not desc_text.startswith('See Instagram'):
+                                description = desc_text.strip()
+                            
+                            # 不要な文字列を削除
+                            unwanted_phrases = [
+                                'See Instagram photos and videos',
+                                'See photos, videos and more on Instagram',
+                                'View this post on Instagram'
+                            ]
+                            for phrase in unwanted_phrases:
+                                if phrase in description:
+                                    description = description.split(phrase)[0].strip()
+                    
+                    print(f"Extracted description: {description[:100] if description else 'None'}")
         
         except Exception as e:
             print(f"Error fetching OG tags: {e}")
