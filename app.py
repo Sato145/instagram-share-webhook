@@ -260,11 +260,20 @@ def create_tweet_text(info):
     if len(description) > 100:
         description = description[:100] + '...'
     
+    # ハッシュタグを生成（ユーザー名ベース）
+    # 'Instagram' の場合は #Instagram、それ以外は #ユーザー名
+    if info['username'] == 'Instagram':
+        hashtag = '#Instagram'
+    else:
+        # ユーザー名をハッシュタグ化（スペースや特殊文字を削除）
+        clean_username = info['username'].replace(' ', '').replace('@', '')
+        hashtag = f"#{clean_username}"
+    
     # テンプレート適用
     if description and description != 'Instagram投稿':
-        tweet_text = f"{emoji} {info['username']}さんの{info['type']}\n\n{description}\n\n{info['url']}\n\n#Instagram"
+        tweet_text = f"{emoji} {info['username']}さんの{info['type']}\n\n{description}\n\n{info['url']}\n\n{hashtag}"
     else:
-        tweet_text = f"{emoji} {info['username']}さんの{info['type']}\n\n{info['url']}\n\n#Instagram"
+        tweet_text = f"{emoji} {info['username']}さんの{info['type']}\n\n{info['url']}\n\n{hashtag}"
     
     return tweet_text
 
