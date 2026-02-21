@@ -190,7 +190,12 @@ def webhook():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
+        # URLを取得（二重ネストに対応）
         instagram_url = data.get('url', '')
+        
+        # もし辞書が返ってきた場合、さらに'url'キーを取得
+        if isinstance(instagram_url, dict):
+            instagram_url = instagram_url.get('url', '')
         
         # デバッグ用ログ
         print(f"Extracted URL type: {type(instagram_url)}")
