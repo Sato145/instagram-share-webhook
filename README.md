@@ -1,12 +1,18 @@
-# Instagram Share Webhook
+# Social Media Share Webhook
 
-iPhoneの共有ボタンから受け取ったInstagram URLを処理し、テンプレート化されたX投稿リンクをPushoverに通知するシステム
+iPhoneの共有ボタンから受け取ったSNS URLを処理し、テンプレート化されたX投稿リンクをPushoverに通知するシステム
 
-## 🎯 機能
+## 🎯 対応プラットフォーム
 
-- ✅ iPhoneの共有ボタンからInstagram URLを受信
-- ✅ Instagram投稿情報を自動取得（ユーザー名、本文、投稿タイプ）
-- ✅ リール/投稿の自動判別
+- ✅ **Instagram** (投稿/リール/ストーリー)
+- ✅ **TikTok** (動画)
+- 🔜 YouTube (予定)
+
+## ✨ 機能
+
+- ✅ iPhoneの共有ボタンからSNS URLを受信
+- ✅ プラットフォーム自動検出（Instagram/TikTok）
+- ✅ 投稿情報を自動取得（ユーザー名、本文、投稿タイプ）
 - ✅ テンプレートに基づいたX投稿文を自動生成
 - ✅ X投稿用のIntent URLを生成
 - ✅ Pushoverに通知（X投稿リンク付き）
@@ -15,11 +21,12 @@ iPhoneの共有ボタンから受け取ったInstagram URLを処理し、テン�
 ## 🏗 システム構成
 
 ```
-iPhone（Instagram共有）
+iPhone（Instagram/TikTok共有）
   ↓ ショートカットアプリ
   ↓ POST https://your-app.onrender.com/webhook
 Renderサーバー（Python Flask）
-  ↓ Instagram投稿情報取得
+  ↓ プラットフォーム検出
+  ↓ 投稿情報取得
   ↓ テンプレート整形
   ↓ X投稿リンク生成
 Pushover通知（X投稿リンク付き）
