@@ -58,9 +58,5 @@ def create_pushover_title(info):
 
 def _get_display_name(info):
     """プラットフォームに応じた表示名を取得"""
-    if info.platform == 'tiktok':
-        # TikTokの場合は@付き
-        return f'@{info.username}'
-    else:
-        # Instagramなどは@なし
-        return info.username
+    # すべてのプラットフォームで@なし
+    return info.username

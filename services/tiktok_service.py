@@ -38,7 +38,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
         url_match = re.search(r'tiktok\.com/@([^/]+)', info.url)
         if url_match:
             username = url_match.group(1)
-            print(f"✓ Extracted username from URL: @{username}")
+            print(f"✓ Extracted username from URL: {username}")
         
         # 動画IDを抽出
         video_match = re.search(r'/video/(\d+)', info.url)
@@ -49,7 +49,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
         # 提供されたユーザー名を優先
         if provided_username:
             info.username = provided_username.lstrip('@')
-            print(f"✓ Using provided username: @{info.username}")
+            print(f"✓ Using provided username: {info.username}")
         elif username:
             info.username = username
         else:
@@ -66,7 +66,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
             if description:
                 info.description = description
             else:
-                info.description = f'@{info.username}さんのTikTok動画をチェック！'
+                info.description = f'{info.username}さんのTikTok動画をチェック！'
         
         # ハッシュタグを生成
         if info.username == 'TikTok':
@@ -75,7 +75,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
             clean_username = info.username.replace(' ', '').replace('@', '')
             info.hashtag = f'#{clean_username}'
         
-        print(f"✓ Final username: @{info.username}")
+        print(f"✓ Final username: {info.username}")
         print(f"✓ Final description: {info.description[:100]}")
         
         return info
