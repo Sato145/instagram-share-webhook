@@ -16,9 +16,9 @@ def create_tweet_text(info):
     
     # テンプレート適用
     if description and description not in ['Instagram投稿をチェック！', 'TikTok動画をチェック！']:
-        tweet_text = f"{info.emoji} {display_name}さんの{info.type}\n\n{description}\n\n{info.url}\n\n{info.hashtag}"
+        tweet_text = f"{info.emoji} {display_name}の{info.type}\n\n{description}\n\n{info.url}\n\n{info.hashtag}"
     else:
-        tweet_text = f"{info.emoji} {display_name}さんの{info.type}\n\n{info.url}\n\n{info.hashtag}"
+        tweet_text = f"{info.emoji} {display_name}の{info.type}\n\n{info.url}\n\n{info.hashtag}"
     
     return tweet_text
 
@@ -31,7 +31,7 @@ def create_pushover_message(info):
     
     # 通知メッセージを構築
     message_parts = [
-        f"{info.emoji} {display_name}さんの{info.type}"
+        f"{info.emoji} {display_name}の{info.type}"
     ]
     
     # 本文がある場合は追加（最大200文字）
