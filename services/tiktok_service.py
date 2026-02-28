@@ -66,7 +66,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
             if description:
                 info.description = description
             else:
-                info.description = f'{info.username}さんのTikTok動画をチェック！'
+                info.description = f'{info.username}のTikTok動画をチェック！'
         
         # ハッシュタグを生成
         if info.username == 'TikTok':

@@ -62,7 +62,7 @@ def extract_instagram_info(url, provided_username='', provided_caption=''):
             if description:
                 info.description = description
             else:
-                info.description = f'{info.username}さんの{info.type}をチェック！'
+                info.description = f'{info.username}の{info.type}をチェック！'
         
         # ハッシュタグを生成
         if info.username == 'Instagram':
