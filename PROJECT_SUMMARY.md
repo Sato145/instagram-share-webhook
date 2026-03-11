@@ -1,21 +1,22 @@
-# Instagram Share Webhook - プロジェクトサマリー
+# Social Media Share Webhook - プロジェクトサマリー
 
 ## 📋 プロジェクト概要
 
-iPhoneの共有ボタンから受け取ったInstagram URLを処理し、テンプレート化されたX投稿リンクをPushoverに通知するシステム
+iPhoneの共有ボタンから受け取ったSNS URLを処理し、テンプレート化されたX投稿リンクをPushoverに通知するシステム
 
 ## 🎯 目的
 
-Instagram投稿を見つけたら、ワンタップでX投稿文を生成し、簡単にXに共有できるようにする
+Instagram、TikTok、YouTube投稿を見つけたら、ワンタップでX投稿文を生成し、簡単にXに共有できるようにする
 
 ## 🏗 システム構成
 
 ```
-iPhone（Instagram共有）
+iPhone（Instagram/TikTok/YouTube共有）
   ↓ ショートカットアプリ
   ↓ POST https://your-app.onrender.com/webhook
 Renderサーバー（Python Flask）
-  ↓ Instagram投稿情報取得
+  ↓ プラットフォーム検出
+  ↓ 投稿情報取得
   ↓ テンプレート整形
   ↓ X投稿リンク生成
 Pushover通知（X投稿リンク付き）
@@ -25,22 +26,31 @@ Xアプリで投稿
 
 ## ✨ 主な機能
 
-1. **Instagram情報自動取得**
-   - ユーザー名
-   - 投稿本文
-   - 投稿タイプ（投稿/リール/ストーリー）
-   - 画像URL
+1. **マルチプラットフォーム対応**
+   - Instagram（投稿/リール/ストーリー）
+   - TikTok（動画）
+   - YouTube（動画/Shorts）
 
-2. **テンプレート整形**
+2. **自動情報取得**
+   - ユーザー名/チャンネル名
+   - 投稿本文/動画タイトル
+   - 投稿タイプ
+
+3. **カスタムハッシュタグ**
+   - ショートカットから指定可能
+   - 複数ハッシュタグ対応
+   - プラットフォーム別設定可能
+
+4. **テンプレート整形**
    - 投稿タイプに応じた絵文字
    - 本文の自動短縮（100文字）
    - ハッシュタグ自動付与
 
-3. **X投稿リンク生成**
+5. **X投稿リンク生成**
    - Twitter Intent URL
    - URLエンコード処理
 
-4. **Pushover通知**
+6. **Pushover通知**
    - リンク付き通知
    - タップでXアプリが開く
 
@@ -49,16 +59,27 @@ Xアプリで投稿
 ```
 instagram-share-webhook/
 ├── app.py                    # メインアプリケーション
+├── services/
+│   ├── __init__.py          # SocialMediaInfoクラス
+│   ├── common.py            # 共通処理
+│   ├── instagram_service.py # Instagram情報取得
+│   ├── tiktok_service.py    # TikTok情報取得
+│   └── youtube_service.py   # YouTube情報取得
+├── templates/
+│   └── __init__.py          # テンプレート生成
 ├── requirements.txt          # 本番環境用パッケージ
 ├── requirements-dev.txt      # 開発環境用パッケージ
 ├── render.yaml              # Render設定ファイル
 ├── .gitignore               # Git除外設定
 ├── .env.example             # 環境変数テンプレート
 ├── test_local.py            # ローカルテストスクリプト
+├── test_youtube.py          # YouTubeテストスクリプト
 ├── README.md                # 完全なドキュメント
 ├── QUICKSTART.md            # クイックスタートガイド
 ├── RENDER_DEPLOY.md         # Renderデプロイガイド
 ├── SHORTCUT_SETUP.md        # iPhoneショートカット設定ガイド
+├── USAGE_GUIDE.md           # 使い方ガイド
+├── CHANGELOG.md             # 変更履歴
 └── PROJECT_SUMMARY.md       # このファイル
 ```
 
@@ -127,7 +148,8 @@ git push -u origin main
 **リクエスト:**
 ```json
 {
-  "url": "https://www.instagram.com/p/xxxxx/"
+  "url": "https://www.instagram.com/p/xxxxx/",
+  "hashtags": "#STU48 #アイドル"
 }
 ```
 
@@ -135,21 +157,33 @@ git push -u origin main
 ```json
 {
   "status": "success",
-  "instagram_info": {
+  "platform": "instagram",
+  "info": {
     "url": "https://www.instagram.com/p/xxxxx/",
     "username": "example_user",
-    "type": "投稿"
+    "type": "投稿",
+    "platform": "instagram"
   },
-  "tweet_text": "📷 example_userさんの投稿\n\n...",
+  "tweet_text": "📷 example_userの投稿\n\n...",
   "twitter_url": "https://twitter.com/intent/tweet?text=...",
   "notification_sent": true,
-  "timestamp": "2026-02-21T12:00:00"
+  "timestamp": "2026-03-11T12:00:00"
 }
 ```
 
 ### GET /
 
 ヘルスチェック
+
+**レスポンス:**
+```json
+{
+  "status": "ok",
+  "service": "Social Media Share Webhook",
+  "version": "3.0.0",
+  "supported_platforms": ["instagram", "tiktok", "youtube"]
+}
+```
 
 ### GET /health
 
@@ -241,7 +275,8 @@ if len(description) > 100:  # ← この数字を変更
 
 ### 短期
 
-- [ ] 複数のテンプレート選択機能
+- [x] 複数SNS対応（Instagram、TikTok、YouTube）
+- [x] カスタムハッシュタグ機能
 - [ ] 画像URLの取得と添付
 - [ ] ユーザー別のカスタムテンプレート
 
@@ -250,12 +285,13 @@ if len(description) > 100:  # ← この数字を変更
 - [ ] X自動投稿機能（X API連携）
 - [ ] 投稿履歴の保存
 - [ ] 統計情報の表示
+- [ ] Threads対応
 
 ### 長期
 
-- [ ] 複数SNS対応（TikTok、YouTube等）
 - [ ] AI要約機能（OpenAI連携）
 - [ ] Webダッシュボード
+- [ ] スケジュール投稿機能
 
 ## 📚 参考資料
 
@@ -279,6 +315,7 @@ MIT License
 ## 👤 作成者
 
 作成日: 2026年2月21日
+最終更新: 2026年3月11日
 作成者: Kiro AI Assistant
 
 ## 📞 サポート
@@ -293,4 +330,4 @@ MIT License
 
 ---
 
-このプロジェクトは、Instagram投稿をXに簡単に共有するための個人利用ツールです。
+このプロジェクトは、Instagram、TikTok、YouTube投稿をXに簡単に共有するための個人利用ツールです。

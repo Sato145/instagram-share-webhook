@@ -9,7 +9,7 @@ from . import SocialMediaInfo
 from .common import clean_url
 
 
-def extract_instagram_info(url, provided_username='', provided_caption=''):
+def extract_instagram_info(url, provided_username='', provided_caption='', provided_hashtags=''):
     """Instagram URLから投稿情報を取得"""
     
     info = SocialMediaInfo()
@@ -65,14 +65,21 @@ def extract_instagram_info(url, provided_username='', provided_caption=''):
                 info.description = f'{info.username}の{info.type}をチェック！'
         
         # ハッシュタグを生成
-        if info.username == 'Instagram':
-            info.hashtag = '#Instagram'
+        if provided_hashtags:
+            # カスタムハッシュタグが提供されている場合
+            info.hashtag = provided_hashtags
+            print(f"✓ Using provided hashtags: {provided_hashtags}")
         else:
-            clean_username = info.username.replace(' ', '').replace('@', '')
-            info.hashtag = f'#{clean_username}'
+            # デフォルトハッシュタグ
+            if info.username == 'Instagram':
+                info.hashtag = '#Instagram'
+            else:
+                clean_username = info.username.replace(' ', '').replace('@', '')
+                info.hashtag = f'#{clean_username}'
         
         print(f"✓ Final username: {info.username}")
         print(f"✓ Final description: {info.description[:100]}")
+        print(f"✓ Final hashtag: {info.hashtag}")
         
         return info
         
@@ -87,7 +94,7 @@ def extract_instagram_info(url, provided_username='', provided_caption=''):
         info.description = provided_caption or 'Instagram投稿をチェック！'
         info.type = 'リール' if '/reel/' in url else '投稿'
         info.emoji = '🎬' if '/reel/' in url else '📷'
-        info.hashtag = '#Instagram'
+        info.hashtag = provided_hashtags or '#Instagram'
         
         return info
 

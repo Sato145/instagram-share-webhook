@@ -9,7 +9,7 @@ from . import SocialMediaInfo
 from .common import clean_url
 
 
-def extract_tiktok_info(url, provided_username='', provided_caption=''):
+def extract_tiktok_info(url, provided_username='', provided_caption='', provided_hashtags=''):
     """TikTok URLから投稿情報を取得"""
     
     info = SocialMediaInfo()
@@ -69,14 +69,21 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
                 info.description = f'{info.username}のTikTok動画をチェック！'
         
         # ハッシュタグを生成
-        if info.username == 'TikTok':
-            info.hashtag = '#TikTok'
+        if provided_hashtags:
+            # カスタムハッシュタグが提供されている場合
+            info.hashtag = provided_hashtags
+            print(f"✓ Using provided hashtags: {provided_hashtags}")
         else:
-            clean_username = info.username.replace(' ', '').replace('@', '')
-            info.hashtag = f'#{clean_username}'
+            # デフォルトハッシュタグ
+            if info.username == 'TikTok':
+                info.hashtag = '#TikTok'
+            else:
+                clean_username = info.username.replace(' ', '').replace('@', '')
+                info.hashtag = f'#{clean_username}'
         
         print(f"✓ Final username: {info.username}")
         print(f"✓ Final description: {info.description[:100]}")
+        print(f"✓ Final hashtag: {info.hashtag}")
         
         return info
         
@@ -89,7 +96,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption=''):
         info.url = clean_url(url)
         info.username = provided_username.lstrip('@') if provided_username else 'TikTok'
         info.description = provided_caption or 'TikTok動画をチェック！'
-        info.hashtag = '#TikTok'
+        info.hashtag = provided_hashtags or '#TikTok'
         
         return info
 

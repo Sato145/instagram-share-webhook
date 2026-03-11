@@ -6,6 +6,7 @@ iPhoneの共有ボタンから受け取ったSNS URLを処理し、
 対応プラットフォーム:
 - Instagram
 - TikTok
+- YouTube
 """
 
 from flask import Flask, request, jsonify
@@ -17,6 +18,7 @@ from datetime import datetime
 from services.common import detect_platform, create_twitter_intent_url
 from services.instagram_service import extract_instagram_info
 from services.tiktok_service import extract_tiktok_info
+from services.youtube_service import extract_youtube_info
 from templates import create_tweet_text, create_pushover_message, create_pushover_title
 
 app = Flask(__name__)
@@ -39,12 +41,15 @@ def extract_social_media_info(url, data):
     # 共通パラメータを取得
     provided_username = data.get('username', '').strip()
     provided_caption = data.get('caption', '').strip()
+    provided_hashtags = data.get('hashtags', '').strip()
     
     # プラットフォーム別に情報抽出
     if platform == 'instagram':
-        return extract_instagram_info(url, provided_username, provided_caption)
+        return extract_instagram_info(url, provided_username, provided_caption, provided_hashtags)
     elif platform == 'tiktok':
-        return extract_tiktok_info(url, provided_username, provided_caption)
+        return extract_tiktok_info(url, provided_username, provided_caption, provided_hashtags)
+    elif platform == 'youtube':
+        return extract_youtube_info(url, provided_username, provided_caption, provided_hashtags)
     else:
         raise ValueError(f"Platform not implemented: {platform}")
 
@@ -88,8 +93,8 @@ def index():
     return jsonify({
         'status': 'ok',
         'service': 'Social Media Share Webhook',
-        'version': '2.0.0',
-        'supported_platforms': ['instagram', 'tiktok'],
+        'version': '3.0.0',
+        'supported_platforms': ['instagram', 'tiktok', 'youtube'],
         'endpoints': {
             'webhook': '/webhook (POST)',
             'health': '/ (GET)'
@@ -155,7 +160,7 @@ def webhook():
         # プラットフォーム検出
         platform = detect_platform(social_url)
         if not platform:
-            return jsonify({'error': 'Unsupported platform. Supported: Instagram, TikTok'}), 400
+            return jsonify({'error': 'Unsupported platform. Supported: Instagram, TikTok, YouTube'}), 400
         
         print(f"Processing {platform.title()} URL: {social_url}")
         
