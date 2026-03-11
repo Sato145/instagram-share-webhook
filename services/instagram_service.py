@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from . import SocialMediaInfo
 from .common import clean_url
+from .hashtag_formatter import format_hashtags
 
 
 def extract_instagram_info(url, provided_username='', provided_caption='', provided_hashtags=''):
@@ -67,8 +68,8 @@ def extract_instagram_info(url, provided_username='', provided_caption='', provi
         # ハッシュタグを生成
         if provided_hashtags:
             # カスタムハッシュタグが提供されている場合
-            info.hashtag = provided_hashtags
-            print(f"✓ Using provided hashtags: {provided_hashtags}")
+            info.hashtag = format_hashtags(provided_hashtags)
+            print(f"✓ Using provided hashtags: {info.hashtag}")
         else:
             # デフォルトハッシュタグ
             if info.username == 'Instagram':
@@ -94,7 +95,7 @@ def extract_instagram_info(url, provided_username='', provided_caption='', provi
         info.description = provided_caption or 'Instagram投稿をチェック！'
         info.type = 'リール' if '/reel/' in url else '投稿'
         info.emoji = '🎬' if '/reel/' in url else '📷'
-        info.hashtag = provided_hashtags or '#Instagram'
+        info.hashtag = format_hashtags(provided_hashtags) if provided_hashtags else '#Instagram'
         
         return info
 

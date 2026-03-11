@@ -27,7 +27,7 @@ def test_youtube_url(url, hashtags=None):
     
     if hashtags:
         payload["hashtags"] = hashtags
-        print(f"Custom hashtags: {hashtags}")
+        print(f"Custom hashtags: {hashtags} (will be formatted to add #)")
     
     try:
         response = requests.post(
@@ -50,5 +50,5 @@ if __name__ == "__main__":
     # 基本テスト
     test_youtube_url(test_urls[0])
     
-    # カスタムハッシュタグテスト
-    test_youtube_url(test_urls[0], hashtags="#YouTube #音楽")
+    # カスタムハッシュタグテスト（#記号なし）
+    test_youtube_url(test_urls[0], hashtags="YouTube 音楽")

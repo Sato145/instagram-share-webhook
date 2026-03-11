@@ -1,6 +1,6 @@
 # 変更履歴
 
-## [3.0.0] - 2026-03-11
+## [3.0.0] - 2026-03-12
 
 ### 追加
 - ✅ YouTube動画のシェアに対応
@@ -9,8 +9,9 @@
   - Shorts (`youtube.com/shorts/`)
 - ✅ カスタムハッシュタグ機能
   - ショートカットから `hashtags` パラメータで指定可能
+  - `#`記号なしで入力（自動的に付与）
   - 複数のハッシュタグをスペース区切りで指定可能
-  - 例: `#STU48 #アイドル #瀬戸内`
+  - 例: `STU48 アイドル 瀬戸内` → `#STU48 #アイドル #瀬戸内`
 
 ### 変更
 - 📝 ショートカット設定ガイドを更新
@@ -23,8 +24,9 @@
 
 ### 技術的な変更
 - 新規ファイル: `services/youtube_service.py`
-- 更新: `services/instagram_service.py` - カスタムハッシュタグ対応
-- 更新: `services/tiktok_service.py` - カスタムハッシュタグ対応
+- 新規ファイル: `services/hashtag_formatter.py`
+- 更新: `services/instagram_service.py` - カスタムハッシュタグ対応（自動#付与）
+- 更新: `services/tiktok_service.py` - カスタムハッシュタグ対応（自動#付与）
 - 更新: `app.py` - YouTube対応とハッシュタグパラメータ処理
 
 ## [2.0.0] - 2026-02-21

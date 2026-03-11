@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from . import SocialMediaInfo
 from .common import clean_url
+from .hashtag_formatter import format_hashtags
 
 
 def extract_tiktok_info(url, provided_username='', provided_caption='', provided_hashtags=''):
@@ -71,8 +72,8 @@ def extract_tiktok_info(url, provided_username='', provided_caption='', provided
         # ハッシュタグを生成
         if provided_hashtags:
             # カスタムハッシュタグが提供されている場合
-            info.hashtag = provided_hashtags
-            print(f"✓ Using provided hashtags: {provided_hashtags}")
+            info.hashtag = format_hashtags(provided_hashtags)
+            print(f"✓ Using provided hashtags: {info.hashtag}")
         else:
             # デフォルトハッシュタグ
             if info.username == 'TikTok':
@@ -96,7 +97,7 @@ def extract_tiktok_info(url, provided_username='', provided_caption='', provided
         info.url = clean_url(url)
         info.username = provided_username.lstrip('@') if provided_username else 'TikTok'
         info.description = provided_caption or 'TikTok動画をチェック！'
-        info.hashtag = provided_hashtags or '#TikTok'
+        info.hashtag = format_hashtags(provided_hashtags) if provided_hashtags else '#TikTok'
         
         return info
 

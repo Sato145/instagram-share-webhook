@@ -35,8 +35,10 @@
 ```
 辞書:
   url: ショートカット入力
-  hashtags: #STU48 #アイドル
+  hashtags: STU48 アイドル
 ```
+
+⚠️ 重要: `#`記号は不要です。自動的に付与されます。
 
 この設定で、すべての共有に同じハッシュタグが使われます。
 
@@ -46,11 +48,11 @@
 
 ```
 if URLに「instagram.com」が含まれる
-  変数を設定: hashtags = "#Instagram #写真"
+  変数を設定: hashtags = "Instagram 写真"
 それ以外 if URLに「tiktok.com」が含まれる
-  変数を設定: hashtags = "#TikTok #動画"
+  変数を設定: hashtags = "TikTok 動画"
 それ以外 if URLに「youtube.com」が含まれる
-  変数を設定: hashtags = "#YouTube #動画"
+  変数を設定: hashtags = "YouTube 動画"
 
 辞書:
   url: ショートカット入力
@@ -66,7 +68,7 @@ if URLに「instagram.com」が含まれる
 名前: アイドル共有
 辞書:
   url: ショートカット入力
-  hashtags: #STU48 #アイドル
+  hashtags: STU48 アイドル
 ```
 
 #### 音楽用
@@ -74,7 +76,7 @@ if URLに「instagram.com」が含まれる
 名前: 音楽共有
 辞書:
   url: ショートカット入力
-  hashtags: #音楽 #Music
+  hashtags: 音楽 Music
 ```
 
 ## 📝 投稿文のフォーマット
@@ -109,7 +111,7 @@ https://instagram.com/p/xxxxx/
 
 ショートカット設定：
 ```
-hashtags: #STU48 #アイドル
+hashtags: STU48 アイドル
 ```
 
 生成される投稿文：
@@ -127,7 +129,7 @@ https://instagram.com/p/xxxxx/
 
 ショートカット設定：
 ```
-hashtags: #音楽 #NewRelease
+hashtags: 音楽 NewRelease
 ```
 
 生成される投稿文：
@@ -145,7 +147,7 @@ https://youtube.com/watch?v=xxxxx
 
 ショートカット設定：
 ```
-hashtags: #TikTok #バズり動画
+hashtags: TikTok バズり動画
 ```
 
 生成される投稿文：
@@ -165,12 +167,13 @@ https://tiktok.com/@creator/video/xxxxx
 
 - ショートカットの辞書に `hashtags` キーが正しく追加されているか確認
 - キー名は小文字で `hashtags` と入力（大文字不可）
-- 値は `#` から始まるハッシュタグ形式
+- 値は `#`記号なしで入力（例: `STU48 アイドル`）
 
 ### 複数のハッシュタグが正しく表示されない
 
 - ハッシュタグはスペース区切りで入力
-- 例: `#Tag1 #Tag2 #Tag3`
+- 例: `STU48 アイドル 瀬戸内`
+- `#`記号は不要（自動的に付与されます）
 - カンマ区切りは不可
 
 ### デフォルトハッシュタグに戻したい
@@ -180,9 +183,10 @@ https://tiktok.com/@creator/video/xxxxx
 
 ## 💡 ヒント
 
+- ハッシュタグは `#`記号なしで入力（自動的に付与されます）
 - ハッシュタグは最大280文字（X投稿の制限）まで
 - 投稿本文とURLを含めた全体が280文字を超える場合、本文が自動的に短縮されます
-- 絵文字もハッシュタグに使用可能（例: `#🎵音楽`）
+- 絵文字もハッシュタグに使用可能（例: `🎵音楽`）
 - 日本語ハッシュタグも使用可能
 
 ## 📊 対応URL形式

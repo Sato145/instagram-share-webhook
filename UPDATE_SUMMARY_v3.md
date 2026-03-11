@@ -27,10 +27,13 @@ Instagram、TikTokに加えて、YouTubeの動画共有に対応しました。
 ```
 辞書:
   url: ショートカット入力
-  hashtags: #STU48 #アイドル
+  hashtags: STU48 アイドル
 ```
 
+⚠️ 重要: `#`記号は不要です。自動的に付与されます。
+
 #### 特徴
+- `#`記号なしで入力（自動的に付与）
 - 複数のハッシュタグをスペース区切りで指定可能
 - プラットフォーム別に異なるハッシュタグを設定可能
 - 省略時はデフォルトハッシュタグを使用
@@ -39,15 +42,17 @@ Instagram、TikTokに加えて、YouTubeの動画共有に対応しました。
 
 ### 新規作成
 - `services/youtube_service.py` - YouTube情報取得サービス
+- `services/hashtag_formatter.py` - ハッシュタグフォーマッター
 - `test_youtube.py` - YouTubeテストスクリプト
+- `test_hashtag_formatter.py` - ハッシュタグフォーマッターテスト
 - `CHANGELOG.md` - 変更履歴
 - `USAGE_GUIDE.md` - 使い方ガイド
 - `UPDATE_SUMMARY_v3.md` - このファイル
 
 ### 更新
 - `app.py` - YouTube対応、ハッシュタグパラメータ処理
-- `services/instagram_service.py` - カスタムハッシュタグ対応
-- `services/tiktok_service.py` - カスタムハッシュタグ対応
+- `services/instagram_service.py` - カスタムハッシュタグ対応（自動#付与）
+- `services/tiktok_service.py` - カスタムハッシュタグ対応（自動#付与）
 - `SHORTCUT_SETUP.md` - カスタムハッシュタグとYouTube対応の説明追加
 - `README.md` - 対応プラットフォームとカスタムハッシュタグ機能を追加
 - `PROJECT_SUMMARY.md` - 最新情報に更新
@@ -88,7 +93,7 @@ git pull origin main
 ```
 辞書:
   url: ショートカット入力
-  hashtags: #STU48 #アイドル
+  hashtags: STU48 アイドル
 ```
 
 **生成される投稿文:**
@@ -108,7 +113,7 @@ https://instagram.com/p/xxxxx/
 ```
 辞書:
   url: ショートカット入力
-  hashtags: #音楽 #NewRelease
+  hashtags: 音楽 NewRelease
 ```
 
 **生成される投稿文:**
@@ -169,11 +174,11 @@ python test_youtube.py
 
 ```
 if URLに「instagram.com」が含まれる
-  変数を設定: hashtags = "#Instagram #写真"
+  変数を設定: hashtags = "Instagram 写真"
 それ以外 if URLに「tiktok.com」が含まれる
-  変数を設定: hashtags = "#TikTok #動画"
+  変数を設定: hashtags = "TikTok 動画"
 それ以外 if URLに「youtube.com」が含まれる
-  変数を設定: hashtags = "#YouTube #動画"
+  変数を設定: hashtags = "YouTube 動画"
 
 辞書:
   url: ショートカット入力
@@ -189,7 +194,7 @@ if URLに「instagram.com」が含まれる
 名前: アイドル共有
 辞書:
   url: ショートカット入力
-  hashtags: #STU48 #アイドル
+  hashtags: STU48 アイドル
 ```
 
 #### 音楽用
@@ -197,7 +202,7 @@ if URLに「instagram.com」が含まれる
 名前: 音楽共有
 辞書:
   url: ショートカット入力
-  hashtags: #音楽 #Music
+  hashtags: 音楽 Music
 ```
 
 ## 🔧 トラブルシューティング
@@ -219,11 +224,13 @@ if URLに「instagram.com」が含まれる
 **原因:**
 - ショートカットの辞書に `hashtags` キーが追加されていない
 - キー名が間違っている（大文字など）
+- `#`記号を付けて入力している
 
 **解決方法:**
 1. ショートカットを開く
 2. 辞書アクションを確認
 3. キー名が小文字で `hashtags` になっているか確認
+4. 値は `#`記号なしで入力（例: `STU48 アイドル`）
 
 ## 📈 パフォーマンス
 
@@ -263,6 +270,7 @@ if URLに「instagram.com」が含まれる
 
 ## 💡 ヒント
 
+- ハッシュタグは `#`記号なしで入力（自動的に付与されます）
 - カスタムハッシュタグは最大280文字まで
 - 複数のショートカットを作成して用途別に使い分けると便利
 - プラットフォーム別に異なるハッシュタグを設定可能
