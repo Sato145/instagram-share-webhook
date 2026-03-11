@@ -70,17 +70,21 @@ def extract_tiktok_info(url, provided_username='', provided_caption='', provided
                 info.description = f'{info.username}のTikTok動画をチェック！'
         
         # ハッシュタグを生成
-        if provided_hashtags:
-            # カスタムハッシュタグが提供されている場合
-            info.hashtag = format_hashtags(provided_hashtags)
-            print(f"✓ Using provided hashtags: {info.hashtag}")
+        # ベースハッシュタグ（ユーザー名から）
+        if info.username == 'TikTok':
+            base_hashtag = '#TikTok'
         else:
-            # デフォルトハッシュタグ
-            if info.username == 'TikTok':
-                info.hashtag = '#TikTok'
-            else:
-                clean_username = info.username.replace(' ', '').replace('@', '')
-                info.hashtag = f'#{clean_username}'
+            clean_username = info.username.replace(' ', '').replace('@', '')
+            base_hashtag = f'#{clean_username}'
+        
+        # カスタムハッシュタグが提供されている場合は追加
+        if provided_hashtags:
+            additional_hashtags = format_hashtags(provided_hashtags)
+            info.hashtag = f'{base_hashtag} {additional_hashtags}'
+            print(f"✓ Using base hashtag: {base_hashtag}")
+            print(f"✓ Adding custom hashtags: {additional_hashtags}")
+        else:
+            info.hashtag = base_hashtag
         
         print(f"✓ Final username: {info.username}")
         print(f"✓ Final description: {info.description[:100]}")
@@ -97,7 +101,14 @@ def extract_tiktok_info(url, provided_username='', provided_caption='', provided
         info.url = clean_url(url)
         info.username = provided_username.lstrip('@') if provided_username else 'TikTok'
         info.description = provided_caption or 'TikTok動画をチェック！'
-        info.hashtag = format_hashtags(provided_hashtags) if provided_hashtags else '#TikTok'
+        
+        # ハッシュタグ生成
+        base_hashtag = f'#{info.username}' if info.username != 'TikTok' else '#TikTok'
+        if provided_hashtags:
+            additional_hashtags = format_hashtags(provided_hashtags)
+            info.hashtag = f'{base_hashtag} {additional_hashtags}'
+        else:
+            info.hashtag = base_hashtag
         
         return info
 

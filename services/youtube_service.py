@@ -54,17 +54,21 @@ def extract_youtube_info(url, provided_username='', provided_caption='', provide
                 print(f"✓ Extracted title: {info.description[:100]}")
         
         # ハッシュタグを生成
-        if provided_hashtags:
-            # カスタムハッシュタグが提供されている場合
-            info.hashtag = format_hashtags(provided_hashtags)
-            print(f"✓ Using provided hashtags: {info.hashtag}")
+        # ベースハッシュタグ（ユーザー名/チャンネル名から）
+        if info.username == 'YouTube':
+            base_hashtag = '#YouTube'
         else:
-            # デフォルトハッシュタグ
-            if info.username == 'YouTube':
-                info.hashtag = '#YouTube'
-            else:
-                clean_username = info.username.replace(' ', '').replace('@', '')
-                info.hashtag = f'#{clean_username}'
+            clean_username = info.username.replace(' ', '').replace('@', '')
+            base_hashtag = f'#{clean_username}'
+        
+        # カスタムハッシュタグが提供されている場合は追加
+        if provided_hashtags:
+            additional_hashtags = format_hashtags(provided_hashtags)
+            info.hashtag = f'{base_hashtag} {additional_hashtags}'
+            print(f"✓ Using base hashtag: {base_hashtag}")
+            print(f"✓ Adding custom hashtags: {additional_hashtags}")
+        else:
+            info.hashtag = base_hashtag
         
         print(f"✓ Final username: {info.username}")
         print(f"✓ Final description: {info.description[:100]}")
@@ -81,7 +85,14 @@ def extract_youtube_info(url, provided_username='', provided_caption='', provide
         info.url = _normalize_youtube_url(url)
         info.username = provided_username or 'YouTube'
         info.description = provided_caption or 'YouTube動画をチェック！'
-        info.hashtag = format_hashtags(provided_hashtags) if provided_hashtags else '#YouTube'
+        
+        # ハッシュタグ生成
+        base_hashtag = f'#{info.username}' if info.username != 'YouTube' else '#YouTube'
+        if provided_hashtags:
+            additional_hashtags = format_hashtags(provided_hashtags)
+            info.hashtag = f'{base_hashtag} {additional_hashtags}'
+        else:
+            info.hashtag = base_hashtag
         
         return info
 
