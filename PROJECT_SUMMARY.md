@@ -30,16 +30,20 @@ Xアプリで投稿
    - Instagram（投稿/リール/ストーリー）
    - TikTok（動画）
    - YouTube（動画/Shorts）
+   - X (Twitter)（ポスト）
+   - Threads（スレッド）
+   - Facebook（投稿）
+   - LinkedIn（投稿）
 
 2. **自動情報取得**
    - ユーザー名/チャンネル名
    - 投稿本文/動画タイトル
    - 投稿タイプ
 
-3. **カスタムハッシュタグ**
-   - ショートカットから指定可能
-   - 複数ハッシュタグ対応
-   - プラットフォーム別設定可能
+3. **ハッシュタグ機能**
+   - ユーザー名ベースのハッシュタグ
+   - 追加のカスタムハッシュタグ
+   - 自動#付与
 
 4. **テンプレート整形**
    - 投稿タイプに応じた絵文字
@@ -62,9 +66,14 @@ instagram-share-webhook/
 ├── services/
 │   ├── __init__.py          # SocialMediaInfoクラス
 │   ├── common.py            # 共通処理
+│   ├── hashtag_formatter.py # ハッシュタグフォーマッター
 │   ├── instagram_service.py # Instagram情報取得
 │   ├── tiktok_service.py    # TikTok情報取得
-│   └── youtube_service.py   # YouTube情報取得
+│   ├── youtube_service.py   # YouTube情報取得
+│   ├── x_service.py         # X (Twitter)情報取得
+│   ├── threads_service.py   # Threads情報取得
+│   ├── facebook_service.py  # Facebook情報取得
+│   └── linkedin_service.py  # LinkedIn情報取得
 ├── templates/
 │   └── __init__.py          # テンプレート生成
 ├── requirements.txt          # 本番環境用パッケージ
@@ -74,11 +83,14 @@ instagram-share-webhook/
 ├── .env.example             # 環境変数テンプレート
 ├── test_local.py            # ローカルテストスクリプト
 ├── test_youtube.py          # YouTubeテストスクリプト
+├── test_hashtag_formatter.py # ハッシュタグフォーマッターテスト
+├── test_all_platforms.py    # 全プラットフォームテスト
 ├── README.md                # 完全なドキュメント
 ├── QUICKSTART.md            # クイックスタートガイド
 ├── RENDER_DEPLOY.md         # Renderデプロイガイド
 ├── SHORTCUT_SETUP.md        # iPhoneショートカット設定ガイド
 ├── USAGE_GUIDE.md           # 使い方ガイド
+├── HASHTAG_FEATURE.md       # ハッシュタグ機能ガイド
 ├── CHANGELOG.md             # 変更履歴
 └── PROJECT_SUMMARY.md       # このファイル
 ```
@@ -167,7 +179,7 @@ git push -u origin main
   "tweet_text": "📷 example_userの投稿\n\n...",
   "twitter_url": "https://twitter.com/intent/tweet?text=...",
   "notification_sent": true,
-  "timestamp": "2026-03-11T12:00:00"
+  "timestamp": "2026-03-12T12:00:00"
 }
 ```
 
@@ -180,8 +192,8 @@ git push -u origin main
 {
   "status": "ok",
   "service": "Social Media Share Webhook",
-  "version": "3.0.0",
-  "supported_platforms": ["instagram", "tiktok", "youtube"]
+  "version": "4.0.0",
+  "supported_platforms": ["instagram", "tiktok", "youtube", "x", "threads", "facebook", "linkedin"]
 }
 ```
 
@@ -275,8 +287,9 @@ if len(description) > 100:  # ← この数字を変更
 
 ### 短期
 
-- [x] 複数SNS対応（Instagram、TikTok、YouTube）
+- [x] 複数SNS対応（Instagram、TikTok、YouTube、X、Threads、Facebook、LinkedIn）
 - [x] カスタムハッシュタグ機能
+- [x] ユーザー名ベースのハッシュタグ
 - [ ] 画像URLの取得と添付
 - [ ] ユーザー別のカスタムテンプレート
 
@@ -285,7 +298,8 @@ if len(description) > 100:  # ← この数字を変更
 - [ ] X自動投稿機能（X API連携）
 - [ ] 投稿履歴の保存
 - [ ] 統計情報の表示
-- [ ] Threads対応
+- [ ] Bluesky対応
+- [ ] Mastodon対応
 
 ### 長期
 
@@ -315,7 +329,7 @@ MIT License
 ## 👤 作成者
 
 作成日: 2026年2月21日
-最終更新: 2026年3月11日
+最終更新: 2026年3月12日
 作成者: Kiro AI Assistant
 
 ## 📞 サポート

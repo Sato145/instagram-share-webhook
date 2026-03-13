@@ -1,5 +1,31 @@
 # 変更履歴
 
+## [4.0.0] - 2026-03-12
+
+### 追加
+- ✅ X (Twitter) のシェアに対応
+  - ポストURL (`twitter.com/username/status/xxxxx`)
+  - 新ドメイン (`x.com/username/status/xxxxx`)
+- ✅ Threads のシェアに対応
+  - スレッドURL (`threads.net/@username/post/xxxxx`)
+- ✅ Facebook のシェアに対応
+  - 投稿URL (`facebook.com/username/posts/xxxxx`)
+  - 動画URL (`facebook.com/username/videos/xxxxx`)
+- ✅ LinkedIn のシェアに対応
+  - 投稿URL (`linkedin.com/posts/username_xxxxx`)
+
+### 変更
+- 📝 対応プラットフォームが7つに拡大
+- 📝 READMEを更新
+
+### 技術的な変更
+- 新規ファイル: `services/x_service.py`
+- 新規ファイル: `services/threads_service.py`
+- 新規ファイル: `services/facebook_service.py`
+- 新規ファイル: `services/linkedin_service.py`
+- 更新: `services/common.py` - プラットフォーム検出を拡張
+- 更新: `app.py` - 新プラットフォーム対応
+
 ## [3.0.0] - 2026-03-12
 
 ### 追加

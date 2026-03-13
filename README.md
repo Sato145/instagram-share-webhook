@@ -7,14 +7,18 @@ iPhoneの共有ボタンから受け取ったSNS URLを処理し、テンプレ�
 - ✅ **Instagram** (投稿/リール/ストーリー)
 - ✅ **TikTok** (動画)
 - ✅ **YouTube** (動画/Shorts)
+- ✅ **X (Twitter)** (ポスト)
+- ✅ **Threads** (スレッド)
+- ✅ **Facebook** (投稿)
+- ✅ **LinkedIn** (投稿)
 
 ## ✨ 機能
 
 - ✅ iPhoneの共有ボタンからSNS URLを受信
-- ✅ プラットフォーム自動検出（Instagram/TikTok/YouTube）
+- ✅ プラットフォーム自動検出（7つのSNSに対応）
 - ✅ 投稿情報を自動取得（ユーザー名、本文、投稿タイプ）
 - ✅ テンプレートに基づいたX投稿文を自動生成
-- ✅ カスタムハッシュタグのサポート
+- ✅ ユーザー名ベースのハッシュタグ + カスタムハッシュタグ
 - ✅ X投稿用のIntent URLを生成
 - ✅ Pushoverに通知（X投稿リンク付き）
 - ✅ Render無料サーバーで24時間稼働
@@ -22,7 +26,7 @@ iPhoneの共有ボタンから受け取ったSNS URLを処理し、テンプレ�
 ## 🏗 システム構成
 
 ```
-iPhone（Instagram/TikTok/YouTube共有）
+iPhone（各種SNS共有）
   ↓ ショートカットアプリ
   ↓ POST https://your-app.onrender.com/webhook
 Renderサーバー（Python Flask）

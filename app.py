@@ -7,6 +7,10 @@ iPhoneの共有ボタンから受け取ったSNS URLを処理し、
 - Instagram
 - TikTok
 - YouTube
+- X (Twitter)
+- Threads
+- Facebook
+- LinkedIn
 """
 
 from flask import Flask, request, jsonify
@@ -19,6 +23,10 @@ from services.common import detect_platform, create_twitter_intent_url
 from services.instagram_service import extract_instagram_info
 from services.tiktok_service import extract_tiktok_info
 from services.youtube_service import extract_youtube_info
+from services.x_service import extract_x_info
+from services.threads_service import extract_threads_info
+from services.facebook_service import extract_facebook_info
+from services.linkedin_service import extract_linkedin_info
 from templates import create_tweet_text, create_pushover_message, create_pushover_title
 
 app = Flask(__name__)
@@ -50,6 +58,14 @@ def extract_social_media_info(url, data):
         return extract_tiktok_info(url, provided_username, provided_caption, provided_hashtags)
     elif platform == 'youtube':
         return extract_youtube_info(url, provided_username, provided_caption, provided_hashtags)
+    elif platform == 'x':
+        return extract_x_info(url, provided_username, provided_caption, provided_hashtags)
+    elif platform == 'threads':
+        return extract_threads_info(url, provided_username, provided_caption, provided_hashtags)
+    elif platform == 'facebook':
+        return extract_facebook_info(url, provided_username, provided_caption, provided_hashtags)
+    elif platform == 'linkedin':
+        return extract_linkedin_info(url, provided_username, provided_caption, provided_hashtags)
     else:
         raise ValueError(f"Platform not implemented: {platform}")
 
@@ -93,8 +109,8 @@ def index():
     return jsonify({
         'status': 'ok',
         'service': 'Social Media Share Webhook',
-        'version': '3.0.0',
-        'supported_platforms': ['instagram', 'tiktok', 'youtube'],
+        'version': '4.0.0',
+        'supported_platforms': ['instagram', 'tiktok', 'youtube', 'x', 'threads', 'facebook', 'linkedin'],
         'endpoints': {
             'webhook': '/webhook (POST)',
             'health': '/ (GET)'
@@ -160,7 +176,7 @@ def webhook():
         # プラットフォーム検出
         platform = detect_platform(social_url)
         if not platform:
-            return jsonify({'error': 'Unsupported platform. Supported: Instagram, TikTok, YouTube'}), 400
+            return jsonify({'error': 'Unsupported platform. Supported: Instagram, TikTok, YouTube, X, Threads, Facebook, LinkedIn'}), 400
         
         print(f"Processing {platform.title()} URL: {social_url}")
         

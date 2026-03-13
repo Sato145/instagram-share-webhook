@@ -26,6 +26,38 @@
 4. Pushover通知が届く
 5. 通知をタップしてXに投稿
 
+### 4. Xポストを共有
+
+1. Xアプリでポストを開く
+2. 共有ボタンをタップ
+3. 「SNS共有」ショートカットを選択
+4. Pushover通知が届く
+5. 通知をタップしてXに投稿
+
+### 5. Threadsスレッドを共有
+
+1. Threadsアプリでスレッドを開く
+2. 共有ボタンをタップ
+3. 「SNS共有」ショートカットを選択
+4. Pushover通知が届く
+5. 通知をタップしてXに投稿
+
+### 6. Facebook投稿を共有
+
+1. Facebookアプリで投稿を開く
+2. 共有ボタンをタップ
+3. 「SNS共有」ショートカットを選択
+4. Pushover通知が届く
+5. 通知をタップしてXに投稿
+
+### 7. LinkedIn投稿を共有
+
+1. LinkedInアプリで投稿を開く
+2. 共有ボタンをタップ
+3. 「SNS共有」ショートカットを選択
+4. Pushover通知が届く
+5. 通知をタップしてXに投稿
+
 ## 🏷️ カスタムハッシュタグの使い方
 
 ### ハッシュタグの構成
@@ -244,3 +276,18 @@ https://tiktok.com/@creator/video/xxxxx
 - 通常: `https://www.youtube.com/watch?v=xxxxx`
 - 短縮: `https://youtu.be/xxxxx`
 - Shorts: `https://www.youtube.com/shorts/xxxxx`
+
+### X (Twitter)
+- 通常: `https://twitter.com/username/status/xxxxx`
+- 新ドメイン: `https://x.com/username/status/xxxxx`
+
+### Threads
+- スレッド: `https://www.threads.net/@username/post/xxxxx`
+
+### Facebook
+- 投稿: `https://www.facebook.com/username/posts/xxxxx`
+- 動画: `https://www.facebook.com/username/videos/xxxxx`
+
+### LinkedIn
+- 投稿: `https://www.linkedin.com/posts/username_xxxxx`
+- フィード: `https://www.linkedin.com/feed/update/urn:li:activity:xxxxx`

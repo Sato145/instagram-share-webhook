@@ -17,6 +17,14 @@ def detect_platform(url):
         return 'tiktok'
     elif 'youtube.com' in url_lower or 'youtu.be' in url_lower:
         return 'youtube'
+    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
+        return 'x'
+    elif 'threads.net' in url_lower:
+        return 'threads'
+    elif 'facebook.com' in url_lower or 'fb.com' in url_lower or 'fb.watch' in url_lower:
+        return 'facebook'
+    elif 'linkedin.com' in url_lower:
+        return 'linkedin'
     else:
         return None
 
